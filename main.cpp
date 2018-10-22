@@ -47,6 +47,8 @@ int main(int argc, char *argv[]){
 		
 		Mat frame,diff, frameDraw;
 		cap >> frame;
+		//medianBlur(diff, diff, 5);
+
 
 		if (frame.empty())
 			break;
@@ -76,7 +78,7 @@ int main(int argc, char *argv[]){
 
 
     	}
-    	threshold(diff, diff, 32, 255, cv::THRESH_BINARY ); //| THRESH_OTSU
+    	threshold(diff, diff, 38, 255, cv::THRESH_BINARY ); // 32
 
     	vector<vector< Point > >conts;
     	vector<Vec4i> hierarchy;
@@ -96,6 +98,7 @@ int main(int argc, char *argv[]){
      	frameDraw = frame.clone();
      	bitwise_not(diff,diff);					// inverte a mascara diff para fazer subtracao
      	cvtColor(diff,diff,COLOR_GRAY2BGR);
+
      	subtract(frame,diff,frameDraw); 		// subtrair a mascara do frame e guarda em frameDraw
 		
 		
@@ -107,8 +110,8 @@ int main(int argc, char *argv[]){
 		
 
     // Press  ESC on keyboard to exit
-		char c=(char)waitKey(50);
-		if(c==50)
+		char c=(char)waitKey(20);
+		if(c==20)
 			break;
 	}
 
