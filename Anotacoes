@@ -1,0 +1,30 @@
+// metodo lucas-Kanade
+// Tensorflow - CNN
+// Motion estimation
+// GMM
+// Multilayer BGS
+
+
+-- Pias bao:
+//Daniel craemer 
+//Thomas Brox
+
+
+----------------------------
+Background subtraction method (camera estática)
+
+-Gerar modelo de fundo(bg)
+
+Pegar primeiro frame e usar de fundo (simples e sensível demais)
+
+----------------------------
+
+Background adaptativo - Mais robusto
+
+
+-
+
+Tentar:
+
+Moda dos ultimos N frames
+Calcular baseado no histograma (?)
