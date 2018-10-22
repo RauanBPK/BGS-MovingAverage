@@ -95,12 +95,17 @@ void calcBG(vector<Mat> frames, int rows, int cols, Mat mean){
 
 
 int main(int argc, char *argv[]){
-
+	if(argc < 2){
+		cout << "Wrong number of arguments.\n";
+		return -1;
+	}
 	namedWindow("Frame", WINDOW_KEEPRATIO);
 	namedWindow("Diff", WINDOW_KEEPRATIO);
 	namedWindow("BG", WINDOW_KEEPRATIO);
-	VideoCapture cap("passarela.mp4"); 
-  //VideoCapture cap("video.mp4"); 
+	//VideoCapture cap("passarela.mp4");
+	//VideoCapture cap("highway.mp4"); 
+
+ VideoCapture cap(argv[1]); 
 
 	if(!cap.isOpened()){
 		cout << "Error opening video stream or file" << endl;
@@ -123,10 +128,10 @@ int main(int argc, char *argv[]){
 	
 
 	int count;
-	float th = 0.2;
+	float th = 0.3;
 	while(cap.isOpened()){
 		
-		Mat frame,diff,diff2;
+		Mat frame,diff,diff2, frameDraw;
 		cap >> frame;
 
 		if (frame.empty())
@@ -138,59 +143,69 @@ int main(int argc, char *argv[]){
 		
 		accumulateWeighted(floatimg, meanBG, th);
 		//accumulateWeighted(floatimg, meanBG, 0.01);
-		th -= 0.0025;
+		//th -= 0.0025;
+		th -= 0.005;
 
-		if(th < 0.015){
-			th = 0.015;
+		if(th < 0.02){
+			th = 0.02;
 		}
 		meanBG.convertTo(meanBG, CV_8UC3);
 		absdiff(meanBG,frame,diff);
 
 		absdiff(frame,firstFrame,diff2);
 		count++;
-		// if(count > 1){
-		// 	count = 0;
-		// 	firstFrame = frame;
-		// }
+		if(count >=0 ){
+			count = 0;
+			firstFrame = frame;
+		}
 
 		cvtColor(diff, diff, COLOR_BGR2GRAY);
 		cvtColor(diff2, diff2, COLOR_BGR2GRAY);
-		// medianBlur(diff, diff, 5);
-		// medianBlur(diff, diff, 5);
-
-
-    	//threshold(diff, diff, 40, 255, cv::THRESH_BINARY ); //| THRESH_OTSU
-    	//threshold(diff2, diff2, 5, 255, cv::THRESH_BINARY );
     	
 
-    	for (int r = 1; r < 5; r++)
+    	for (int r = 1; r < 2; r++)
     	{
-    		Mat kernel = getStructuringElement(MORPH_ELLIPSE, Size(3*r + 1, 3*r +1));
+    		Mat kernel = getStructuringElement(MORPH_ELLIPSE, Size(4*r + 1, 4*r +1));
     		morphologyEx(diff, diff, MORPH_CLOSE, kernel);
     		morphologyEx(diff, diff, MORPH_OPEN, kernel);
 
-    		morphologyEx(diff2, diff2, MORPH_CLOSE, kernel);
-    		morphologyEx(diff2, diff2, MORPH_OPEN, kernel);
-    	}
-    	threshold(diff, diff, 33, 255, cv::THRESH_BINARY ); //| THRESH_OTSU
-		dilate(diff,diff,Mat(),Point(-1,-1), 3, 1 ,1 );
-		//dilate(diff2,diff2,Mat(),Point(-1,-1), 1, 1 ,1 );
 
-		//bitwise_or(diff2,diff,diff);
+    	}
+    	threshold(diff, diff, 32, 255, cv::THRESH_BINARY ); //| THRESH_OTSU
+
+    	Mat im_floodfill = diff.clone();
+    	floodFill(im_floodfill, cv::Point(0,0), Scalar(255));
+    	Mat im_floodfill_inv;
+   		
+   		bitwise_not(im_floodfill, im_floodfill_inv);
+     
+    	// Combine the two images to get the foreground.
+   		Mat im_out = (diff | im_floodfill_inv);
+
+		dilate(im_out,im_out,Mat(),Point(-1,-1), 3, 1 ,1 );
+    	for (int r = 1; r < 3; r++)
+    	{
+    		Mat kernel = getStructuringElement(MORPH_ELLIPSE, Size(3*r + 1, 3*r +1));
+    		morphologyEx(im_out, im_out, MORPH_CLOSE, kernel);
+    		morphologyEx(im_out, im_out, MORPH_OPEN, kernel);
+
+    		
+    	}
 
     	vector<vector< Point > >conts;
     	vector<Vec4i> hierarchy;
-    	findContours(diff, conts, hierarchy, RETR_TREE  , CHAIN_APPROX_NONE);
+    	findContours(im_out, conts, hierarchy, RETR_TREE  , CHAIN_APPROX_NONE);
+    	frameDraw = frame.clone();
     	for(int i=0; i<conts.size(); i++)
-    	{
-			drawContours(frame, conts, i, Scalar(0,0,255), 1, LINE_AA); //desenha contorno
+    	{	
+			drawContours(frameDraw, conts, i, Scalar(0,0,255), 1, LINE_AA); //desenha contorno
 		}
 		
 		
     // Display the resulting frame
-		imshow( "Frame", frame );
-		imshow("Diff", diff);
-		//imshow("diff2",diff2);
+		imshow( "Frame", frameDraw );
+		imshow("Diff", im_out);
+		imshow("diff2",diff);
 		imshow("BG",meanBG);
 		
 
