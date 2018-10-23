@@ -38,7 +38,7 @@ int main(int argc, char *argv[]){
     float th = 0.3;
     char str[50] = "Numero de carros: 0";
     while(cap.isOpened()){
-        
+
         Mat frame,diff, frameDraw;
         
         cap >> frame;
@@ -65,10 +65,12 @@ int main(int argc, char *argv[]){
         meanBG.convertTo(meanBG, CV_8UC3);
         absdiff(meanBG,frame,diff);
 
+
         Rect r=Rect(0,frame.rows - 200,frame.cols, 14);
         rectangle(frame,r,Scalar(255,0,0),-1,8,0);
 
         cvtColor(diff, diff, COLOR_BGR2GRAY);
+
 
         for (int r = 1; r < 3; r++)
         {
@@ -78,9 +80,14 @@ int main(int argc, char *argv[]){
         }
         
         threshold(diff, diff, 38, 255, cv::THRESH_BINARY ); // 32
+
        // dilate(diff, diff, 0, Point(-1, -1), 8, 1, 1);
         vector<vector< Point > >conts;
+        vector<vector< Point > >contsHull;
+        vector<vector< Point > >contsHull2;
         vector<Vec4i> hierarchy;
+
+
         findContours(diff, conts, hierarchy, RETR_TREE  , CHAIN_APPROX_NONE);
         
 
@@ -88,14 +95,67 @@ int main(int argc, char *argv[]){
         Scalar color = Scalar( 0 ,191,255);
 
         
-
+//faz o hull dos contornos iniciais
         for(int i=0; i<conts.size(); i++){
+
             if(conts[i].size() > 150 && hierarchy[i][3] == -1){   // se for maior e nao tiver pai (coitado)
 
+
+                convexHull( Mat(conts[i]), hull[i], false );
+
+                drawContours( diff , hull, i, Scalar(255,255,255), -1, 8, vector<Vec4i>(), 0, Point() );
+                
+            }
+
+        }
+// calcula momentos de cada contorno dps do hull se < 100     
+        
+        int numMom = 0;
+        findContours(diff, contsHull, RETR_LIST  , CHAIN_APPROX_NONE);
+        vector<Moments> mom(contsHull.size());
+        for(int i=0; i<contsHull.size(); i++){
+            if(contsHull[i].size() > 1){
+
+                mom[numMom] = moments(contsHull[i],true);
+                numMom++;
+
+            }
+        }
+// pra cada momento faz o centro e calcula a distancia pros outros e desenha se perto
+        for(int i =0 ; i < numMom;i++){
+            Point p(mom[i].m10/mom[i].m00, mom[i].m01/mom[i].m00);
+            for(int j = i; j < numMom; j++){
+                Point p2(mom[j].m10/mom[j].m00, mom[j].m01/mom[j].m00);
+                double dist  = norm(p-p2);
+                if( dist < 30){
+                    line(diff, p, p2, cv::Scalar(255,255,255), 4);
+                }
+            }
+        }
+
+// //acha o novo contorno e faz hull dnv
+//         findContours(diff, contsHull, RETR_LIST  , CHAIN_APPROX_NONE);
+//         for(int i=0; i<contsHull.size(); i++){
+
+//             if(contsHull[i].size() > 150){   // se for maior e nao tiver pai (coitado)
+
+
+//                 convexHull( Mat(conts[i]), hull[i], false );
+
+//                 drawContours( diff , hull, i, Scalar(255,255,255), -1, 8, vector<Vec4i>(), 0, Point() );
+                
+//             }
+
+//         }
+        findContours(diff, contsHull, RETR_LIST  , CHAIN_APPROX_NONE);
+        for(int i=0; i<contsHull.size(); i++){
+            if(contsHull[i].size() > 100){
+
+
+                
                 Mat M;
 
-
-                Rect boundRect = boundingRect(Mat(conts[i]));
+                Rect boundRect = boundingRect(Mat(contsHull[i]));
                 rectangle( frame, boundRect.tl(), boundRect.br(), Scalar( 0 ,191,255), 2, 8, 0 );
                 Point center_of_rect = (boundRect.br() + boundRect.tl())*0.5;
                 
@@ -107,15 +167,6 @@ int main(int argc, char *argv[]){
                     
                     sprintf(str,"Numero de carros: %d", numCarros );
                 }
-                
-                
-
-            //Desenha bounding rectangle minimo
-                // for( int j = 0; j < 4; j++ )
-                //     line( frame, rect_points[j], rect_points[(j+1)%4], Scalar(255,0,0), 4, 8 );
-
-                convexHull( Mat(conts[i]), hull[i], false );
-                drawContours( diff , hull, i, color, -1, 8, vector<Vec4i>(), 0, Point() );
             }
             putText(frame, str, Point(100,100), FONT_HERSHEY_PLAIN,4, Scalar(0,0,255),3);
             cout << "Num carros: " << numCarros << "\n";
@@ -140,10 +191,10 @@ int main(int argc, char *argv[]){
         //char c=(char)waitKey(20);
         //if(c==20)
          //   break;
-     }
+    }
 
-     cap.release();
-     destroyAllWindows();
+    cap.release();
+    destroyAllWindows();
 
-     return 0;
- }
+    return 0;
+}
