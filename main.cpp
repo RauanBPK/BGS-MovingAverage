@@ -117,6 +117,7 @@ int main(int argc, char *argv[]){
                 drawContours( diff , hull, i, color, -1, 8, vector<Vec4i>(), 0, Point() );
             }
             putText(frame, str, Point(100,100), FONT_HERSHEY_PLAIN,4, Scalar(0,0,255),3);
+            cout << "Num carros: " << numCarros << "\n";
         }
 
         
