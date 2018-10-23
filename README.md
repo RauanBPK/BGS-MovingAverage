@@ -11,3 +11,5 @@ Estimated BG - Current Frame - Moving parts - Mask
 The parameters are hard-coded. ( yeah, sorry)
 Not the best piece of code i've written, but ok.
 (:
+
+Video used: https://www.youtube.com/watch?v=dTdsjKRyMuU
