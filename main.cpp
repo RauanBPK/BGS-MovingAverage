@@ -85,7 +85,7 @@ int main(int argc, char *argv[]){
         
 
         vector<vector<Point> >hull( conts.size() );
-        Scalar color = Scalar( 255,255,255);
+        Scalar color = Scalar( 0 ,191,255);
 
         
 
@@ -96,13 +96,14 @@ int main(int argc, char *argv[]){
 
 
                 Rect boundRect = boundingRect(Mat(conts[i]));
-                rectangle( frame, boundRect.tl(), boundRect.br(), Scalar(0,191,255), 2, 8, 0 );
+                rectangle( frame, boundRect.tl(), boundRect.br(), Scalar( 0 ,191,255), 2, 8, 0 );
                 Point center_of_rect = (boundRect.br() + boundRect.tl())*0.5;
                 
                 
                 if (r.contains(center_of_rect)){
                     numCarros++;
                     //cout << numCarros << "\n";
+                    rectangle(frame,r,Scalar(30,190,10),-1,8,0);
                     
                     sprintf(str,"Numero de carros: %d", numCarros );
                 }
