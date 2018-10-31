@@ -10,8 +10,6 @@
 using namespace cv;
 using namespace std;
 
-
-
 int main(int argc, char *argv[]){
     if(argc < 2){
         cout << "Wrong number of arguments.\n";
@@ -40,12 +38,15 @@ int main(int argc, char *argv[]){
     while(cap.isOpened()){
 
         Mat frame,diff, frameDraw;
+
+      
         
         cap >> frame;
 
-        frameDraw = frame.clone();
+
 
         
+        frameDraw = frame.clone();
 
         if (frame.empty())
             break;
@@ -59,14 +60,14 @@ int main(int argc, char *argv[]){
 
         th -= 0.005;
 
-        if(th < 0.02){
-            th = 0.02;
+        if(th < 0.018){
+            th = 0.018;
         }
         meanBG.convertTo(meanBG, CV_8UC3);
         absdiff(meanBG,frame,diff);
 
 
-        Rect r=Rect(0,frame.rows - 200,frame.cols, 14);
+        Rect r=Rect(0,frame.rows - 200,frame.cols, 14); //Parametrizar
         rectangle(frame,r,Scalar(255,0,0),-1,8,0);
 
         cvtColor(diff, diff, COLOR_BGR2GRAY);
@@ -78,10 +79,11 @@ int main(int argc, char *argv[]){
             morphologyEx(diff, diff, MORPH_CLOSE, kernel);
             morphologyEx(diff, diff, MORPH_OPEN, kernel);
         }
+        //dilate(diff, diff, 0, Point(-1, -1), 6, 1, 1);
         
         threshold(diff, diff, 38, 255, cv::THRESH_BINARY ); // 32
 
-       // dilate(diff, diff, 0, Point(-1, -1), 8, 1, 1);
+       
         vector<vector< Point > >conts;
         vector<vector< Point > >contsHull;
         vector<Vec4i> hierarchy;
