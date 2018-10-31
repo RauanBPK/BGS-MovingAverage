@@ -33,19 +33,16 @@ int main(int argc, char *argv[]){
     cap >> frame;
     Mat meanBG = Mat::zeros(frame.size(), CV_32FC3);
 
-    float th = 0.3;
+    float addWeight = 0.3;
+    float minWeight = 0.018;
+    float step = 0.005;
     char str[50] = "Numero de carros: 0";
     while(cap.isOpened()){
 
         Mat frame,diff, frameDraw;
-
-      
         
         cap >> frame;
 
-
-
-        
         frameDraw = frame.clone();
 
         if (frame.empty())
@@ -56,18 +53,18 @@ int main(int argc, char *argv[]){
         frame.convertTo(floatimg, CV_32FC3);
 
         
-        accumulateWeighted(floatimg, meanBG, th);
+        accumulateWeighted(floatimg, meanBG, addWeight);
 
-        th -= 0.005;
+        addWeight -= step;
 
-        if(th < 0.018){
-            th = 0.018;
+        if(addWeight < minWeight){
+            addWeight = minWeight;
         }
         meanBG.convertTo(meanBG, CV_8UC3);
         absdiff(meanBG,frame,diff);
 
 
-        Rect r=Rect(0,frame.rows - 200,frame.cols, 14); //Parametrizar
+        Rect r=Rect(0,frame.rows - 200,frame.cols, 14);
         rectangle(frame,r,Scalar(255,0,0),-1,8,0);
 
         cvtColor(diff, diff, COLOR_BGR2GRAY);
@@ -79,11 +76,9 @@ int main(int argc, char *argv[]){
             morphologyEx(diff, diff, MORPH_CLOSE, kernel);
             morphologyEx(diff, diff, MORPH_OPEN, kernel);
         }
-        //dilate(diff, diff, 0, Point(-1, -1), 6, 1, 1);
         
-        threshold(diff, diff, 38, 255, cv::THRESH_BINARY ); // 32
+        threshold(diff, diff, 35, 255, cv::THRESH_BINARY ); // 32
 
-       
         vector<vector< Point > >conts;
         vector<vector< Point > >contsHull;
         vector<Vec4i> hierarchy;
@@ -151,9 +146,7 @@ int main(int argc, char *argv[]){
 
     // Press  ESC on keyboard to exit
         waitKey(0);
-        //char c=(char)waitKey(20);
-        //if(c==20)
-         //   break;
+
     }
 
     cap.release();
