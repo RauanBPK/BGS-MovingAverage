@@ -2,14 +2,16 @@
 Simple background subtraction algorithm (simple!). Finds contours, some morphological operations, uses convexHull (see Opencv) and uses it as a mask for extracting
 moving parts of the video.
 
-!Good(ish) for static cameras only. (like, reaaally static)!
+Works good with static cameras only!
 Compile with -O3 (y)
 
-Estimated BG - Current Frame - Moving parts - Mask 
-![Demomain](https://github.com/RauanBPK/BGS-MovingAverage/blob/master/demo.png)
+Veja o ![Artigo/Article](https://github.com/RauanBPK/BGS-MovingAverage/blob/master/Trabalho_6___Background_subtraction.pdf) para compreender o funcionamento do algoritmo
 
-The parameters are hard-coded. ( yeah, sorry)
-Not the best piece of code i've written, but ok.
-(:
+Estimated BG - Current Frame - Moving parts - Mask 
+![Demo-main](https://github.com/RauanBPK/BGS-MovingAverage/blob/master/demo.png)
+
+The parameters are hard-coded.
+
+Not very organized, but proud of this work anyway. :)
 
 Video used: https://www.youtube.com/watch?v=dTdsjKRyMuU
